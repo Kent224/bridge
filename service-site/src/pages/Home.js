@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 import BridgeLogo from '../components/BridgeLogo';
 
 const HomeContainer = styled.div`
@@ -319,6 +320,16 @@ const SecondaryButton = styled.a`
   }
 `;
 
+// セクションタイトル下の棒のアニメーション
+const lineExtendAnimation = keyframes`
+  from {
+    width: 0;
+  }
+  to {
+    width: 80px;
+  }
+`;
+
 // 問題提起セクション - PIVOTスタイル
 const QuestionSection = styled.section`
   padding: calc(var(--spacing-xxl) * 2) var(--spacing-xl);
@@ -347,11 +358,12 @@ const QuestionTitle = styled.h2`
   &::after {
     content: '';
     display: block;
-    width: 80px;
+    width: ${({ inView }) => (inView ? '80px' : '0')};
     height: 4px;
     background: var(--gradient-primary);
     margin: 0.8rem auto 0;
     border-radius: 2px;
+    animation: ${({ inView }) => (inView ? lineExtendAnimation : 'none')} 1s ease-out forwards;
   }
   
   @media (max-width: 768px) {
@@ -408,11 +420,12 @@ const SolutionTitle = styled.h2`
   &::after {
     content: '';
     display: block;
-    width: 80px;
+    width: ${({ inView }) => (inView ? '80px' : '0')};
     height: 4px;
     background: var(--gradient-primary);
     margin: 0.8rem auto 0;
     border-radius: 2px;
+    animation: ${({ inView }) => (inView ? lineExtendAnimation : 'none')} 1s ease-out forwards;
   }
   
   @media (max-width: 768px) {
@@ -436,7 +449,8 @@ const SolutionText = styled.p`
   }
 `;
 
-const SolutionCards = styled.div`
+// アニメーション付きのカードコンテナ
+const SolutionCards = styled(motion.div)`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--spacing-xl);
@@ -449,7 +463,7 @@ const SolutionCards = styled.div`
   }
 `;
 
-const SolutionCard = styled.div`
+const SolutionCard = styled(motion.div)`
   background: var(--white);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
@@ -555,11 +569,12 @@ const ContentsSectionTitle = styled.h2`
   &::after {
     content: '';
     display: block;
-    width: 80px;
+    width: ${({ inView }) => (inView ? '80px' : '0')};
     height: 4px;
     background: var(--gradient-primary);
     margin: 0.8rem auto 0;
     border-radius: 2px;
+    animation: ${({ inView }) => (inView ? lineExtendAnimation : 'none')} 1s ease-out forwards;
   }
   
   @media (max-width: 768px) {
@@ -581,7 +596,7 @@ const SectionSubtitle = styled.p`
   }
 `;
 
-const ContentCards = styled.div`
+const ContentCards = styled(motion.div)`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--spacing-xl);
@@ -594,7 +609,7 @@ const ContentCards = styled.div`
   }
 `;
 
-const ContentCard = styled.div`
+const ContentCard = styled(motion.div)`
   background: var(--white);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -824,6 +839,32 @@ const Home = () => {
   // ページ読み込み時のアニメーション制御用ステート
   const [isLoaded, setIsLoaded] = useState(false);
   
+  // スクロール検出のための参照
+  const [questionTitleRef, questionTitleInView] = useInView({
+    triggerOnce: true,
+    threshold: 0.5,
+  });
+  
+  const [solutionTitleRef, solutionTitleInView] = useInView({
+    triggerOnce: true,
+    threshold: 0.5,
+  });
+  
+  const [contentsTitleRef, contentsTitleInView] = useInView({
+    triggerOnce: true,
+    threshold: 0.5,
+  });
+  
+  const [solutionCardsRef, solutionCardsInView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+  
+  const [contentCardsRef, contentCardsInView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+  
   useEffect(() => {
     // コンポーネントがマウントされた後にアニメーションを開始
     setIsLoaded(true);
@@ -843,6 +884,31 @@ const Home = () => {
   
   const itemVariants = {
     hidden: { y: 50, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        damping: 12,
+        stiffness: 100
+      }
+    }
+  };
+  
+  // カード用アニメーションバリアント
+  const cardsContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        delayChildren: 0.2,
+        staggerChildren: 0.15
+      }
+    }
+  };
+  
+  const cardVariants = {
+    hidden: { y: 30, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
@@ -924,7 +990,7 @@ const Home = () => {
 
       <QuestionSection>
         <QuestionContainer>
-          <QuestionTitle>PROBLEM</QuestionTitle>
+          <QuestionTitle ref={questionTitleRef} inView={questionTitleInView}>PROBLEM</QuestionTitle>
           <QuestionText>
             AIの情報は日々目まぐるしく<br />
             更新されています。<br />
@@ -935,26 +1001,31 @@ const Home = () => {
       </QuestionSection>
       <SolutionSection>
         <SolutionContainer>
-          <SolutionTitle>SOLUTION</SolutionTitle>
+          <SolutionTitle ref={solutionTitleRef} inView={solutionTitleInView}>SOLUTION</SolutionTitle>
           <SolutionText>
             Bridgeは、日常に溶け込むLINEを活用した<br />
             新しいAI学習体験を提供します。
           </SolutionText>
           
-          <SolutionCards>
-            <SolutionCard>
+          <SolutionCards 
+            ref={solutionCardsRef}
+            variants={cardsContainerVariants}
+            initial="hidden"
+            animate={solutionCardsInView ? "visible" : "hidden"}
+          >
+            <SolutionCard variants={cardVariants}>
               <SolutionCardTitle>気軽にアクセス</SolutionCardTitle>
               <SolutionCardText>
                 毎日使うLINEで、スキマ時間を活用して効率的に学べます。新しいアプリをインストールする必要もなく、チャット感覚でAIについて学べます。
               </SolutionCardText>
             </SolutionCard>
-            <SolutionCard>
+            <SolutionCard variants={cardVariants}>
               <SolutionCardTitle>わかりやすい解説</SolutionCardTitle>
               <SolutionCardText>
                 専門用語を噛み砕いた解説で、初心者でも理解できる内容になっています。AIの基本から応用まで、段階的に知識を深められます。
               </SolutionCardText>
             </SolutionCard>
-            <SolutionCard>
+            <SolutionCard variants={cardVariants}>
               <SolutionCardTitle>質問し放題</SolutionCardTitle>
               <SolutionCardText>
                 わからないことがあれば、AIチャットボットがいつでも回答。あなただけのパーソナルティーチャーとして、疑問をその場で解決します。
@@ -969,13 +1040,18 @@ const Home = () => {
       </SolutionSection>
 
       <ContentsSection>
-        <ContentsSectionTitle>CONTENTS</ContentsSectionTitle>
+        <ContentsSectionTitle ref={contentsTitleRef} inView={contentsTitleInView}>CONTENTS</ContentsSectionTitle>
         <SectionSubtitle>
           AIの理解を深めるための<br />
           厳選されたコンテンツをご紹介します
         </SectionSubtitle>
-        <ContentCards>
-          <ContentCard>
+        <ContentCards 
+          ref={contentCardsRef}
+          variants={cardsContainerVariants}
+          initial="hidden"
+          animate={contentCardsInView ? "visible" : "hidden"}
+        >
+          <ContentCard variants={cardVariants}>
             <ContentImage />
             <ContentInfo>
               <ContentTitle>AIの基礎知識</ContentTitle>
@@ -985,7 +1061,7 @@ const Home = () => {
               <ContentLink to="/contents/ai-basics">詳しく見る<span>→</span></ContentLink>
             </ContentInfo>
           </ContentCard>
-          <ContentCard>
+          <ContentCard variants={cardVariants}>
             <ContentImage />
             <ContentInfo>
               <ContentTitle>ビジネスでのAI活用法</ContentTitle>
@@ -995,7 +1071,7 @@ const Home = () => {
               <ContentLink to="/contents/business-ai">詳しく見る<span>→</span></ContentLink>
             </ContentInfo>
           </ContentCard>
-          <ContentCard>
+          <ContentCard variants={cardVariants}>
             <ContentImage />
             <ContentInfo>
               <ContentTitle>AIとの上手な対話方法</ContentTitle>
