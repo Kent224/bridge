@@ -332,6 +332,17 @@ const PageButton = styled.button`
   }
 `;
 
+const ArticleCardLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+  
+  &:hover {
+    text-decoration: none;
+  }
+`;
+
 // 記事一覧ページコンポーネント
 const Articles = () => {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -417,29 +428,34 @@ const Articles = () => {
           
           <ArticlesGrid>
             {filteredArticles.map(article => (
-              <ArticleCard key={article.id}>
-                <ArticleImage>
-                  <img src={article.image} alt={article.title} />
-                  <ArticleCategory>{article.category}</ArticleCategory>
-                  {article.source && (
-                    <ArticleSource type={article.source.type}>
-                      {article.source.type === 'note' && 'note記事'}
-                    </ArticleSource>
-                  )}
-                </ArticleImage>
-                <ArticleContent>
-                  <ArticleMeta>
-                    <ArticleDate>{article.date}</ArticleDate>
-                  </ArticleMeta>
-                  <ArticleTitle>
-                    <Link to={`/articles/${article.slug}`}>{article.title}</Link>
-                  </ArticleTitle>
-                  <ArticleExcerpt>{generateExcerpt(article.content)}</ArticleExcerpt>
-                  <ArticleReadMore to={`/articles/${article.slug}`}>
-                    続きを読む<span>→</span>
-                  </ArticleReadMore>
-                </ArticleContent>
-              </ArticleCard>
+              <ArticleCardLink
+                key={article.id}
+                to={`/articles/${article.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ArticleCard>
+                  <ArticleImage>
+                    <img src={article.image} alt={article.title} />
+                    <ArticleCategory>{article.category}</ArticleCategory>
+                    {article.source && (
+                      <ArticleSource type={article.source.type}>
+                        {article.source.type === 'note' && 'note記事'}
+                      </ArticleSource>
+                    )}
+                  </ArticleImage>
+                  <ArticleContent>
+                    <ArticleMeta>
+                      <ArticleDate>{article.date}</ArticleDate>
+                    </ArticleMeta>
+                    <ArticleTitle>
+                      {article.title}
+                    </ArticleTitle>
+                    <ArticleExcerpt>{generateExcerpt(article.content)}</ArticleExcerpt>
+                    <span>続きを読む →</span>
+                  </ArticleContent>
+                </ArticleCard>
+              </ArticleCardLink>
             ))}
           </ArticlesGrid>
           
