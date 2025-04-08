@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { articles } from '../data/articles';
+import { articles as defaultArticles } from '../data/articles';
 
 // スタイル定義
 const PageContainer = styled.div`
@@ -427,29 +427,67 @@ const SourceIcon = styled.span`
 const ArticleDetail = () => {
   const { slug } = useParams();
   const [article, setArticle] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [relatedArticles, setRelatedArticles] = useState([]);
+  const navigate = useNavigate();
   
   useEffect(() => {
-    // 記事データの取得
-    const foundArticle = articles.find(article => article.slug === slug);
-    setArticle(foundArticle);
+    // ローカルストレージから記事データを取得
+    const localArticles = localStorage.getItem('articles');
+    const parsedLocalArticles = localArticles ? JSON.parse(localArticles) : [];
     
-    // 関連記事の取得
-    if (foundArticle) {
-      const related = articles
-        .filter(a => foundArticle.relatedArticles.includes(a.id))
-        .slice(0, 3);
-      setRelatedArticles(related);
+    // デフォルトの記事データとローカルストレージのデータを結合
+    const allArticles = [...defaultArticles, ...parsedLocalArticles];
+    
+    // URLのスラッグに一致する記事を検索
+    const foundArticle = allArticles.find(a => a.slug === slug);
+    
+    // noteURLがある場合は、そのURLにリダイレクト
+    if (foundArticle && foundArticle.noteUrl) {
+      window.location.href = foundArticle.noteUrl;
+      return;
     }
-  }, [slug]);
+    
+    if (foundArticle) {
+      setArticle(foundArticle);
+      
+      // 関連記事の取得
+      let related = [];
+      if (foundArticle.relatedArticles) {
+        related = allArticles.filter(a => 
+          foundArticle.relatedArticles.includes(a.id) && a.id !== foundArticle.id
+        ).slice(0, 3);
+      } else {
+        // 関連記事が指定されていない場合は同じカテゴリの記事を表示
+        related = allArticles.filter(a => 
+          a.category === foundArticle.category && a.id !== foundArticle.id
+        ).slice(0, 3);
+      }
+      
+      setRelatedArticles(related);
+    } else {
+      // 記事が見つからない場合は404ページに移動
+      navigate('/not-found', { replace: true });
+    }
+    
+    setLoading(false);
+  }, [slug, navigate]);
   
   if (!article) {
+    if (loading) {
+      return (
+        <PageContainer>
+          <Container style={{ minHeight: '50vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <p>記事を読み込んでいます...</p>
+          </Container>
+        </PageContainer>
+      );
+    }
+    
     return (
       <PageContainer>
-        <Container>
-          <h1>記事が見つかりません</h1>
-          <p>お探しの記事は存在しないか、移動された可能性があります。</p>
-          <BackToArticles to="/articles">記事一覧に戻る</BackToArticles>
+        <Container style={{ minHeight: '50vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <p>記事が見つかりませんでした。</p>
         </Container>
       </PageContainer>
     );

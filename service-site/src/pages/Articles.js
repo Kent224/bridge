@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { articles } from '../data/articles';
+import { articles as defaultArticles } from '../data/articles';
 
 // スタイル定義
 const PageContainer = styled.div`
@@ -334,28 +334,50 @@ const PageButton = styled.button`
 
 // 記事一覧ページコンポーネント
 const Articles = () => {
-  const [activeCategory, setActiveCategory] = useState('すべて');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [articles, setArticles] = useState([]);
+  
+  // 記事データの読み込み
+  useEffect(() => {
+    // ローカルストレージから記事データを取得
+    const localArticles = localStorage.getItem('articles');
+    const parsedLocalArticles = localArticles ? JSON.parse(localArticles) : [];
+    
+    // デフォルトの記事データとローカルストレージのデータを結合
+    setArticles([...defaultArticles, ...parsedLocalArticles]);
+  }, []);
   
   // カテゴリーの一覧を記事データから抽出
-  const uniqueCategories = [...new Set(articles.map(article => article.category))];
-  const categories = ['すべて', ...uniqueCategories];
+  const categories = ['all', ...new Set(articles.map(article => article.category))];
   
-  // カテゴリーと検索クエリによるフィルタリング
+  // カテゴリーと検索条件でフィルタリングされた記事
   const filteredArticles = articles.filter(article => {
-    const matchesCategory = activeCategory === 'すべて' || article.category === activeCategory;
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          article.content.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeCategory === 'all' || article.category === activeCategory;
+    const matchesSearch = !searchTerm || 
+      article.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (article.content && article.content.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
-
-  // 記事の抜粋を生成する関数
+  
+  // 記事の内容から抜粋を生成する関数
   const generateExcerpt = (content, maxLength = 150) => {
+    if (!content) return '';
+    
     // HTMLタグを除去
-    const textContent = content.replace(/<[^>]*>/g, '');
-    // 指定された長さで切り取り
-    if (textContent.length <= maxLength) return textContent;
-    return textContent.substring(0, maxLength) + '...';
+    const plainText = content.replace(/<[^>]+>/g, '');
+    
+    if (plainText.length <= maxLength) return plainText;
+    
+    // 最大長さまでの文字列を取得し、最後の単語が切れないように調整
+    let excerpt = plainText.substring(0, maxLength);
+    const lastSpaceIndex = excerpt.lastIndexOf(' ');
+    
+    if (lastSpaceIndex > 0) {
+      excerpt = excerpt.substring(0, lastSpaceIndex);
+    }
+    
+    return excerpt + '...';
   };
 
   return (
@@ -372,12 +394,12 @@ const Articles = () => {
           <FilterBar>
             <Categories>
               {categories.map(category => (
-                <CategoryButton 
+                <CategoryButton
                   key={category}
                   active={activeCategory === category}
                   onClick={() => setActiveCategory(category)}
                 >
-                  {category}
+                  {category === 'all' ? 'すべて' : category}
                 </CategoryButton>
               ))}
             </Categories>
@@ -386,8 +408,8 @@ const Articles = () => {
               <SearchInput 
                 type="text" 
                 placeholder="記事を検索..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
               <SearchIcon>🔍</SearchIcon>
             </SearchBar>
