@@ -11,6 +11,9 @@ import ArticleDetail from './pages/ArticleDetail';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Contents from './pages/Contents';
+import AdminLayout from './pages/admin/AdminLayout';
+import Dashboard from './pages/admin/Dashboard';
+import ArticleManager from './pages/admin/ArticleManager';
 
 // アニメーション付きフローティングボタン
 const MobileLineButton = styled.a`
@@ -88,17 +91,30 @@ function App() {
   return (
     <Router>
       <GlobalStyle />
-      <Header />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/articles" element={<Articles />} />
-        <Route path="/articles/:slug" element={<ArticleDetail />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/contents" element={<Contents />} />
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="articles" element={<ArticleManager />} />
+        </Route>
+
+        {/* Public Routes */}
+        <Route path="/" element={
+          <>
+            <Header />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/articles" element={<Articles />} />
+              <Route path="/articles/:slug" element={<ArticleDetail />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/contents" element={<Contents />} />
+            </Routes>
+            <Footer />
+          </>
+        } />
       </Routes>
-      <Footer />
       <MobileLineButton 
         href="https://lin.ee/aTshCxr"
         target="_blank"

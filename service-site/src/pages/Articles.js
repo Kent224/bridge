@@ -249,7 +249,7 @@ const ArticleTitle = styled.h2`
   line-height: 1.4;
   
   a {
-    color: var(--text-primary);
+    color: inherit;
     text-decoration: none;
     
     &:hover {
@@ -263,32 +263,30 @@ const ArticleTitle = styled.h2`
 `;
 
 const ArticleExcerpt = styled.p`
-  font-size: var(--font-size-sm);
   color: var(--text-secondary);
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   margin-bottom: var(--spacing-md);
   flex: 1;
 `;
 
 const ArticleReadMore = styled(Link)`
-  font-size: var(--font-size-sm);
   color: var(--primary-color);
   text-decoration: none;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   display: inline-flex;
   align-items: center;
   
-  &:hover {
-    text-decoration: underline;
-  }
-  
   span {
-    margin-left: 4px;
+    margin-left: var(--spacing-xs);
     transition: transform var(--transition-fast);
   }
   
-  &:hover span {
-    transform: translateX(3px);
+  &:hover {
+    span {
+      transform: translateX(4px);
+    }
   }
 `;
 
@@ -329,6 +327,17 @@ const PageButton = styled.button`
   @media (max-width: 768px) {
     width: 36px;
     height: 36px;
+  }
+`;
+
+const ArticleCardLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+  
+  &:hover {
+    text-decoration: none;
   }
 `;
 
@@ -383,9 +392,9 @@ const Articles = () => {
   return (
     <PageContainer>
       <HeroSection>
-        <PageTitle>AI関連記事</PageTitle>
+        <PageTitle>AIに関する記事</PageTitle>
         <PageDescription>
-          AI技術に関する最新情報や基礎知識、活用方法など、さまざまなコンテンツをご紹介します。
+          AIの最新トレンド、活用事例、基礎知識など、さまざまな角度からAIについて解説します。
         </PageDescription>
       </HeroSection>
       
@@ -399,7 +408,7 @@ const Articles = () => {
                   active={activeCategory === category}
                   onClick={() => setActiveCategory(category)}
                 >
-                  {category === 'all' ? 'すべて' : category}
+                  {category}
                 </CategoryButton>
               ))}
             </Categories>
@@ -417,29 +426,34 @@ const Articles = () => {
           
           <ArticlesGrid>
             {filteredArticles.map(article => (
-              <ArticleCard key={article.id}>
-                <ArticleImage>
-                  <img src={article.image} alt={article.title} />
-                  <ArticleCategory>{article.category}</ArticleCategory>
-                  {article.source && (
-                    <ArticleSource type={article.source.type}>
-                      {article.source.type === 'note' && 'note記事'}
-                    </ArticleSource>
-                  )}
-                </ArticleImage>
-                <ArticleContent>
-                  <ArticleMeta>
-                    <ArticleDate>{article.date}</ArticleDate>
-                  </ArticleMeta>
-                  <ArticleTitle>
-                    <Link to={`/articles/${article.slug}`}>{article.title}</Link>
-                  </ArticleTitle>
-                  <ArticleExcerpt>{generateExcerpt(article.content)}</ArticleExcerpt>
-                  <ArticleReadMore to={`/articles/${article.slug}`}>
-                    続きを読む<span>→</span>
-                  </ArticleReadMore>
-                </ArticleContent>
-              </ArticleCard>
+              <ArticleCardLink
+                key={article.id}
+                to={`/articles/${article.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ArticleCard>
+                  <ArticleImage>
+                    <img src={article.image} alt={article.title} />
+                    <ArticleCategory>{article.category}</ArticleCategory>
+                    {article.source && (
+                      <ArticleSource type={article.source.type}>
+                        {article.source.type === 'note' && 'note記事'}
+                      </ArticleSource>
+                    )}
+                  </ArticleImage>
+                  <ArticleContent>
+                    <ArticleMeta>
+                      <ArticleDate>{article.date}</ArticleDate>
+                    </ArticleMeta>
+                    <ArticleTitle>
+                      {article.title}
+                    </ArticleTitle>
+                    <ArticleExcerpt>{generateExcerpt(article.content)}</ArticleExcerpt>
+                    <span>続きを読む →</span>
+                  </ArticleContent>
+                </ArticleCard>
+              </ArticleCardLink>
             ))}
           </ArticlesGrid>
           
