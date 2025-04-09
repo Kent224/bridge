@@ -41,10 +41,11 @@ jobs:
 
       - name: Debug host value
         run: |
-          echo "SSH_HOST value (masked): ***${{ secrets.SSH_HOST }}***"
-          echo "First 10 characters of KNOWN_HOSTS: ***${KNOWN_HOSTS_FIRST_10}***"
-        env:
-          KNOWN_HOSTS_FIRST_10: ${{ secrets.KNOWN_HOSTS && secrets.KNOWN_HOSTS[0:10] || 'Not set' }}
+          echo "Checking SSH configuration..."
+          echo "SSH_USERNAME is set: ${{ secrets.SSH_USERNAME != '' }}"
+          echo "SSH_HOST is set: ${{ secrets.SSH_HOST != '' }}"
+          echo "REMOTE_PATH is set: ${{ secrets.REMOTE_PATH != '' }}"
+          echo "KNOWN_HOSTS is set: ${{ secrets.KNOWN_HOSTS != '' }}"
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
