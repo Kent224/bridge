@@ -49,124 +49,50 @@ jobs:
           echo "SSH_PRIVATE_KEY is set: ${{ secrets.SSH_PRIVATE_KEY != '' }}"
           echo "First few characters of SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY != '' && format('{0}...', secrets.SSH_PRIVATE_KEY, 0, 10) || 'Not provided' }}"
 
-      # 秘密鍵のセットアップを改善
-      - name: Setup SSH key
+      # まったく新しい方法でSSHキーを生成
+      - name: Generate new SSH keys
         run: |
           mkdir -p ~/.ssh
           
-          # SSHキーの内容をデバッグ（最初の数文字だけ表示）
-          echo "SSH Key starts with: $(echo '${{ secrets.SSH_PRIVATE_KEY }}' | cut -c1-20)..."
+          # 既存の鍵の確認
+          echo "Checking existing key content (first few chars):"
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | head -c 20 || echo "No key content found"
           
-          # 秘密鍵の最初の行をチェック
-          FIRST_LINE=$(echo '${{ secrets.SSH_PRIVATE_KEY }}' | head -n 1)
-          echo "First line of the key: ${FIRST_LINE:0:30}..."
+          # ワークフロー内で新しい鍵を生成
+          echo "Generating fresh SSH keys..."
+          ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N "" -C "github-actions-deploy@example.com"
           
-          # PEMフォーマットの鍵を使用
-          echo "Using PEM format private key"
-          touch ~/.ssh/id_rsa
-          # まず一般的なPEM形式のヘッダーとフッターを確認
-          if [[ "$FIRST_LINE" != "-----BEGIN"* ]]; then
-            echo "Key doesn't start with proper header, adding PEM format headers"
-            echo "-----BEGIN RSA PRIVATE KEY-----" > ~/.ssh/id_rsa
-            echo "${{ secrets.SSH_PRIVATE_KEY }}" | sed -e '/-----BEGIN/d' -e '/-----END/d' >> ~/.ssh/id_rsa
-            echo "-----END RSA PRIVATE KEY-----" >> ~/.ssh/id_rsa
-          else
-            echo "Key already has proper headers"
-            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          fi
+          # 公開鍵を表示
+          echo "新しく生成された公開鍵（サーバーに設定する必要があります）:"
+          cat ~/.ssh/id_rsa.pub
+          
+          # SSHディレクトリの権限を設定
+          chmod 700 ~/.ssh
           chmod 600 ~/.ssh/id_rsa
-          
-          # 鍵の形式とコンテンツを詳細に確認
-          echo "Private key file info:"
-          file ~/.ssh/id_rsa || echo "Failed to get file info"
-          echo "Private key beginning (first 3 lines):"
-          head -n 3 ~/.ssh/id_rsa || echo "Failed to read key"
-          echo "Private key ending (last 3 lines):"
-          tail -n 3 ~/.ssh/id_rsa || echo "Failed to read key"
-          echo "Private key length in bytes:"
-          wc -c ~/.ssh/id_rsa || echo "Failed to get key size"
-          
-          # OpenSSLを使用して鍵を検証
-          echo "Validating private key with OpenSSL:"
-          openssl rsa -in ~/.ssh/id_rsa -check -noout || echo "OpenSSL validation failed - key may be in wrong format"
-          
-          # 秘密鍵から公開鍵を生成しようとしてみる（エラーでも続行）
-          echo "Trying to derive public key (may fail if format is incorrect):"
-          ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub 2>/dev/null || echo "Could not generate public key - key may be in wrong format"
-          
-          if [ -f ~/.ssh/id_rsa.pub ]; then
-            echo "Public key successfully generated"
-            echo "Public key: $(cat ~/.ssh/id_rsa.pub)"
-          fi
           
           # known_hostsファイルの設定
           echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           
-          # SSH設定を確認
+          # SSH設定の確認
           ls -la ~/.ssh
 
-      # さらに別の鍵フォーマットを試す
-      - name: Try alternative key formats
+      # SSHの簡易テスト
+      - name: Test SSH connection
         run: |
-          echo "Trying alternative key formats..."
-          
-          # OpenSSHフォーマットを試す
-          echo "Attempting OpenSSH format..."
-          cp ~/.ssh/id_rsa ~/.ssh/id_rsa_pem
-          echo "-----BEGIN OPENSSH PRIVATE KEY-----" > ~/.ssh/id_rsa
-          cat ~/.ssh/id_rsa_pem | grep -v "BEGIN\|END" >> ~/.ssh/id_rsa
-          echo "-----END OPENSSH PRIVATE KEY-----" >> ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          
-          # 鍵の検証
-          echo "Checking OpenSSH format key:"
-          file ~/.ssh/id_rsa
-          # 公開鍵の生成を試みる
-          ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.openssh.pub 2>/dev/null || echo "Could not generate public key from OpenSSH format"
-          
-          if [ -f ~/.ssh/id_rsa.openssh.pub ]; then
-            echo "OpenSSH format worked! Public key: $(cat ~/.ssh/id_rsa.openssh.pub)"
-            # 成功した場合は終了
-            touch ~/.ssh/openssh_format_worked
-          else
-            # PEMフォーマットに戻す
-            echo "OpenSSH format failed, reverting to PEM format"
-            cp ~/.ssh/id_rsa_pem ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
-          fi
+          # 実際のデプロイの前にSSH接続をテスト
+          echo "Testing SSH connection (will fail because new key is not on server yet)..."
+          ssh -v -p 8022 -o BatchMode=yes -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful" || echo "Expected failure - new key needs to be added to server"
 
-      # 別のディレクトリに鍵を配置してみる
-      - name: Create alternative SSH directory
+      # スクリプトでのデプロイは一時的に無効化
+      - name: Deployment instructions
         run: |
-          # ホームディレクトリ直下に鍵を配置
-          cp ~/.ssh/id_rsa ~/id_rsa
-          chmod 600 ~/id_rsa
-          
-          # SSHの設定ファイルを作成
-          echo "IdentityFile ~/id_rsa" > ~/.ssh/config
-          echo "Port 8022" >> ~/.ssh/config
-          chmod 600 ~/.ssh/config
-          
-          echo "SSH config created:"
-          cat ~/.ssh/config
-
-      - name: Test SSH connection with full debug
-        run: |
-          echo "Testing SSH connection with default key location..."
-          # 完全なデバッグ情報でSSH接続をテスト
-          ssh -vvv -p 8022 -o BatchMode=yes -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful" || true
-          
-          echo "Testing with alternative key location..."
-          ssh -vvv -i ~/id_rsa -p 8022 -o BatchMode=yes -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful" || true
-          
-          # SSHデバッグ情報をより詳細に表示
-          echo "SSH debug info:"
-          SSH_AUTH_SOCK= ssh-add -l || echo "No keys in agent"
-          
-          # キーの形式を表示
-          echo "Key format according to ssh-keygen:"
-          ssh-keygen -l -f ~/.ssh/id_rsa || echo "Could not get key fingerprint"
+          echo "実際のデプロイのために、以下の作業が必要です:"
+          echo "1. 上記に表示された新しい公開鍵をサーバーの ~/.ssh/authorized_keys に追加してください"
+          echo "2. 追加したら、このワークフローを再実行してください"
+          echo ""
+          echo "※このワークフローは意図的に失敗するように設定されています。鍵のセットアップ後に再実行してください。"
+          exit 1  # 意図的に失敗させる
 
       - name: Deploy to GMO Cloud
         working-directory: service-site
