@@ -53,18 +53,17 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          # 秘密鍵の内容を確認
-          echo "-----BEGIN OPENSSH PRIVATE KEY-----" > ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | grep -v "BEGIN\|END" >> ~/.ssh/id_rsa
-          echo "-----END OPENSSH PRIVATE KEY-----" >> ~/.ssh/id_rsa
+          # 秘密鍵を安全に保存する
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
-          # 鍵の形式を確認
-          echo "Private key file format:"
+          # 鍵の形式とコンテンツを詳細に確認
+          echo "Private key file info:"
           file ~/.ssh/id_rsa
-          
-          # 秘密鍵から公開鍵を生成
-          ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub || echo "Failed to generate public key from private key"
+          echo "Private key beginning:"
+          head -n 3 ~/.ssh/id_rsa
+          echo "Private key length in bytes:"
+          wc -c ~/.ssh/id_rsa
           
           # known_hostsファイルの設定
           echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
@@ -72,8 +71,25 @@ jobs:
           
           # SSH設定を確認
           ls -la ~/.ssh
-          echo "Private key content (first line):"
-          head -n 1 ~/.ssh/id_rsa
+
+      # デバッグ用に秘密鍵を修正する追加のステップ（必要な場合）
+      - name: Fix SSH key format if needed
+        run: |
+          # 現在の鍵の先頭を確認
+          if ! grep -q "BEGIN" ~/.ssh/id_rsa; then
+            echo "SSH key does not have proper header. Attempting to fix..."
+            # ヘッダーとフッターを追加
+            cp ~/.ssh/id_rsa ~/.ssh/id_rsa.bak
+            echo "-----BEGIN OPENSSH PRIVATE KEY-----" > ~/.ssh/id_rsa.new
+            cat ~/.ssh/id_rsa.bak >> ~/.ssh/id_rsa.new
+            echo "-----END OPENSSH PRIVATE KEY-----" >> ~/.ssh/id_rsa.new
+            mv ~/.ssh/id_rsa.new ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+            echo "Fixed key format:"
+            head -n 3 ~/.ssh/id_rsa
+          else
+            echo "SSH key has proper headers."
+          fi
 
       - name: Test SSH connection with verbose output
         run: |
