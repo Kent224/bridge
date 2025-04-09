@@ -86,6 +86,10 @@ jobs:
           echo "Private key length in bytes:"
           wc -c ~/.ssh/id_rsa || echo "Failed to get key size"
           
+          # OpenSSLを使用して鍵を検証
+          echo "Validating private key with OpenSSL:"
+          openssl rsa -in ~/.ssh/id_rsa -check -noout || echo "OpenSSL validation failed - key may be in wrong format"
+          
           # 秘密鍵から公開鍵を生成しようとしてみる（エラーでも続行）
           echo "Trying to derive public key (may fail if format is incorrect):"
           ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub 2>/dev/null || echo "Could not generate public key - key may be in wrong format"
@@ -102,43 +106,67 @@ jobs:
           # SSH設定を確認
           ls -la ~/.ssh
 
-      # デバッグ用にさらに詳細な鍵の診断
-      - name: Diagnose SSH key issues
+      # さらに別の鍵フォーマットを試す
+      - name: Try alternative key formats
         run: |
-          echo "Diagnosing potential SSH key issues..."
+          echo "Trying alternative key formats..."
           
-          # 鍵の内容をバックアップ
-          cp ~/.ssh/id_rsa ~/.ssh/id_rsa.original
-          
-          # 一般的なエラーとして、改行の問題がある可能性がある
-          echo "Checking for line ending issues..."
-          cat ~/.ssh/id_rsa.original | tr -d '\r' > ~/.ssh/id_rsa
+          # OpenSSHフォーマットを試す
+          echo "Attempting OpenSSH format..."
+          cp ~/.ssh/id_rsa ~/.ssh/id_rsa_pem
+          echo "-----BEGIN OPENSSH PRIVATE KEY-----" > ~/.ssh/id_rsa
+          cat ~/.ssh/id_rsa_pem | grep -v "BEGIN\|END" >> ~/.ssh/id_rsa
+          echo "-----END OPENSSH PRIVATE KEY-----" >> ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
-          # Base64エンコーディングを再適用してみる
-          echo "Attempting to fix potential Base64 encoding issues..."
-          if grep -q "BEGIN" ~/.ssh/id_rsa; then
-            # ヘッダー/フッターを取り除いてBase64部分のみを取得
-            cat ~/.ssh/id_rsa | grep -v "BEGIN\|END" > ~/.ssh/base64_content
-            # 適切なPEM形式で再構築
-            echo "-----BEGIN RSA PRIVATE KEY-----" > ~/.ssh/id_rsa.fixed
-            cat ~/.ssh/base64_content | tr -d '\n' | fold -w 64 >> ~/.ssh/id_rsa.fixed
-            echo "" >> ~/.ssh/id_rsa.fixed
-            echo "-----END RSA PRIVATE KEY-----" >> ~/.ssh/id_rsa.fixed
-            
-            mv ~/.ssh/id_rsa.fixed ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
-            echo "Key reformatted with proper Base64 encoding"
-          fi
+          # 鍵の検証
+          echo "Checking OpenSSH format key:"
+          file ~/.ssh/id_rsa
+          # 公開鍵の生成を試みる
+          ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.openssh.pub 2>/dev/null || echo "Could not generate public key from OpenSSH format"
           
-          echo "Final key format check:"
-          head -n 3 ~/.ssh/id_rsa
+          if [ -f ~/.ssh/id_rsa.openssh.pub ]; then
+            echo "OpenSSH format worked! Public key: $(cat ~/.ssh/id_rsa.openssh.pub)"
+            # 成功した場合は終了
+            touch ~/.ssh/openssh_format_worked
+          else
+            # PEMフォーマットに戻す
+            echo "OpenSSH format failed, reverting to PEM format"
+            cp ~/.ssh/id_rsa_pem ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+          fi
 
-      - name: Test SSH connection with verbose output
+      # 別のディレクトリに鍵を配置してみる
+      - name: Create alternative SSH directory
         run: |
-          echo "Testing SSH connection..."
-          # より詳細な情報でSSH接続をテスト
-          ssh -vvv -p 8022 -o BatchMode=yes -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful"
+          # ホームディレクトリ直下に鍵を配置
+          cp ~/.ssh/id_rsa ~/id_rsa
+          chmod 600 ~/id_rsa
+          
+          # SSHの設定ファイルを作成
+          echo "IdentityFile ~/id_rsa" > ~/.ssh/config
+          echo "Port 8022" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
+          
+          echo "SSH config created:"
+          cat ~/.ssh/config
+
+      - name: Test SSH connection with full debug
+        run: |
+          echo "Testing SSH connection with default key location..."
+          # 完全なデバッグ情報でSSH接続をテスト
+          ssh -vvv -p 8022 -o BatchMode=yes -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful" || true
+          
+          echo "Testing with alternative key location..."
+          ssh -vvv -i ~/id_rsa -p 8022 -o BatchMode=yes -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful" || true
+          
+          # SSHデバッグ情報をより詳細に表示
+          echo "SSH debug info:"
+          SSH_AUTH_SOCK= ssh-add -l || echo "No keys in agent"
+          
+          # キーの形式を表示
+          echo "Key format according to ssh-keygen:"
+          ssh-keygen -l -f ~/.ssh/id_rsa || echo "Could not get key fingerprint"
 
       - name: Deploy to GMO Cloud
         working-directory: service-site
