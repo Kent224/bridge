@@ -70,28 +70,67 @@ jobs:
           chmod 700 ~/.ssh
           chmod 600 ~/.ssh/id_rsa
           
-          # known_hostsファイルの設定
-          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          # SSH設定ファイルの作成
+          echo "Host gmo
+            HostName www295.onamae.ne.jp
+            User ${{ secrets.SSH_USERNAME }}
+            Port 8022
+            IdentityFile ~/.ssh/id_rsa
+            StrictHostKeyChecking no" > ~/.ssh/config
+          
+          chmod 600 ~/.ssh/config
+          
+          # サーバーのホストキーを自動的に取得
+          ssh-keyscan -p 8022 -H www295.onamae.ne.jp >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           
           # SSH設定の確認
           ls -la ~/.ssh
+          cat ~/.ssh/config
 
-      # SSHの簡易テスト
+      # SSHの詳細テスト
       - name: Test SSH connection
         run: |
-          # 実際のデプロイの前にSSH接続をテスト
-          echo "Testing SSH connection..."
-          ssh -v -p 8022 -o BatchMode=yes -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful" || echo "SSH接続に失敗しました。公開鍵がサーバーに正しく設定されているか確認してください。"
+          # サーバー側のログを確認（認証失敗の詳細情報を得るため）
+          echo "Testing SSH connection with verbose output..."
           
-          # 接続テスト後に公開鍵を表示（念のため）
-          echo "公開鍵（まだ設定していない場合）:"
+          # より詳細な情報を取得するためにデバッグモードでテスト
+          ssh -vvv -p 8022 ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful" || echo "SSH接続に失敗しました"
+          
+          # 公開鍵を再度表示
+          echo "公開鍵（正しく設定されているか確認）:"
           cat ~/.ssh/id_rsa.pub
+          
+          # SSHエージェントを使って試す
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_rsa
+          ssh -p 8022 -o BatchMode=yes ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH with agent successful" || echo "SSHエージェントでの接続も失敗しました"
 
       # デプロイステップを有効化
       - name: Deploy to GMO Cloud
         working-directory: service-site
         run: |
           echo "Starting deployment to www295.onamae.ne.jp:${{ secrets.REMOTE_PATH }}"
-          rsync -avz -e "ssh -p 8022 -o StrictHostKeyChecking=no" --delete dist/ ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp:${{ secrets.REMOTE_PATH }}
-          echo "デプロイが完了しました！" 
+          
+          # SSHエージェントを使用したrsync
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_rsa
+          
+          # rsyncでのデプロイを試行
+          rsync -avz -e "ssh -p 8022" --delete dist/ ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp:${{ secrets.REMOTE_PATH }} || \
+          
+          # rsyncが失敗した場合はscpを試行
+          echo "rsyncでの転送に失敗しました。scpを試行します..." && \
+          scp -P 8022 -r dist/* ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp:${{ secrets.REMOTE_PATH }} || \
+          
+          # scpも失敗した場合はtarを使用
+          echo "scpでの転送も失敗しました。tarを使用して転送を試みます..." && \
+          tar -czf dist.tar.gz -C dist . && \
+          scp -P 8022 dist.tar.gz ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp:/tmp/ && \
+          ssh -p 8022 ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "cd ${{ secrets.REMOTE_PATH }} && tar -xzf /tmp/dist.tar.gz && rm /tmp/dist.tar.gz" && \
+          echo "tarを使用したデプロイが完了しました！" || \
+          
+          # すべて失敗した場合
+          echo "すべての転送方法が失敗しました。サーバー設定を確認してください。"
+          
+          echo "デプロイプロセスが終了しました。" 
