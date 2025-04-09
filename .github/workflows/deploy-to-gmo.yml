@@ -20,6 +20,11 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'service-site/package-lock.json'
 
+      - name: Debug - List directories
+        run: |
+          ls -la
+          ls -la service-site || echo "service-site directory not found"
+
       - name: Install dependencies
         working-directory: service-site
         run: npm ci
@@ -28,6 +33,19 @@ jobs:
         working-directory: service-site
         run: npm run build
 
+      - name: Debug - Check build output
+        working-directory: service-site
+        run: |
+          ls -la
+          ls -la dist || echo "dist directory not found"
+
+      - name: Debug host value
+        run: |
+          echo "SSH_HOST value (masked): ***${{ secrets.SSH_HOST }}***"
+          echo "First 10 characters of KNOWN_HOSTS: ***${KNOWN_HOSTS_FIRST_10}***"
+        env:
+          KNOWN_HOSTS_FIRST_10: ${{ secrets.KNOWN_HOSTS && secrets.KNOWN_HOSTS[0:10] || 'Not set' }}
+
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
@@ -35,8 +53,13 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: replace
 
+      - name: Test SSH connection with verbose output
+        run: |
+          ssh -v -p 8022 -o BatchMode=yes -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful"
+
       - name: Deploy to GMO Cloud
         working-directory: service-site
         run: |
-          rsync -avz -e "ssh -p 8022" --delete dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}
+          echo "Starting deployment to www295.onamae.ne.jp:${{ secrets.REMOTE_PATH }}"
+          rsync -avz -e "ssh -p 8022 -o StrictHostKeyChecking=no" --delete dist/ ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp:${{ secrets.REMOTE_PATH }}
           echo "デプロイが完了しました！" 
