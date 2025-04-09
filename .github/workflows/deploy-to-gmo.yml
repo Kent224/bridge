@@ -81,19 +81,14 @@ jobs:
       - name: Test SSH connection
         run: |
           # 実際のデプロイの前にSSH接続をテスト
-          echo "Testing SSH connection (will fail because new key is not on server yet)..."
-          ssh -v -p 8022 -o BatchMode=yes -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful" || echo "Expected failure - new key needs to be added to server"
+          echo "Testing SSH connection..."
+          ssh -v -p 8022 -o BatchMode=yes -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@www295.onamae.ne.jp "echo SSH connection successful" || echo "SSH接続に失敗しました。公開鍵がサーバーに正しく設定されているか確認してください。"
+          
+          # 接続テスト後に公開鍵を表示（念のため）
+          echo "公開鍵（まだ設定していない場合）:"
+          cat ~/.ssh/id_rsa.pub
 
-      # スクリプトでのデプロイは一時的に無効化
-      - name: Deployment instructions
-        run: |
-          echo "実際のデプロイのために、以下の作業が必要です:"
-          echo "1. 上記に表示された新しい公開鍵をサーバーの ~/.ssh/authorized_keys に追加してください"
-          echo "2. 追加したら、このワークフローを再実行してください"
-          echo ""
-          echo "※このワークフローは意図的に失敗するように設定されています。鍵のセットアップ後に再実行してください。"
-          exit 1  # 意図的に失敗させる
-
+      # デプロイステップを有効化
       - name: Deploy to GMO Cloud
         working-directory: service-site
         run: |
