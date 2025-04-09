@@ -38,5 +38,5 @@ jobs:
       - name: Deploy to GMO Cloud
         working-directory: service-site
         run: |
-          rsync -avz --delete dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}
+          rsync -avz -e "ssh -p 8022" --delete dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}
           echo "デプロイが完了しました！" 
