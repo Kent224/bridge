@@ -1,9 +1,11 @@
+// THIS_IS_TEST_EDIT_20240824_PLEASE_CHECK_IF_VISIBLE
 import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import BridgeLogo from '../components/BridgeLogo';
+import { articles } from '../data/articles';
 
 const HomeContainer = styled.div`
   display: flex;
@@ -542,182 +544,102 @@ const SolutionButton = styled.a`
 
 // コンテンツセクション
 const ContentsSection = styled.section`
-  padding: calc(var(--spacing-xxl) * 2) var(--spacing-lg);
+  padding: calc(var(--spacing-xl) * 2) var(--spacing-lg);
   background: var(--white);
-  position: relative;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, rgba(88, 52, 173, 0.1) 0%, rgba(88, 52, 173, 0.5) 50%, rgba(88, 52, 173, 0.1) 100%);
-  }
 `;
 
-const ContentsSectionTitle = styled.h2`
-  font-size: clamp(2rem, 7vw, 3.5rem);
-  font-weight: var(--font-weight-bold);
+const ContentTitle = styled.h2`
+  font-size: clamp(2rem, 5vw, 3rem);
   text-align: center;
-  margin-bottom: calc(var(--spacing-xl) * 1.5);
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-  position: relative;
-  
-  &::after {
-    content: '';
-    display: block;
-    width: ${({ inView }) => (inView ? '80px' : '0')};
-    height: 4px;
-    background: var(--gradient-primary);
-    margin: 0.8rem auto 0;
-    border-radius: 2px;
-    animation: ${({ inView }) => (inView ? lineExtendAnimation : 'none')} 1s ease-out forwards;
-  }
-  
-  @media (max-width: 768px) {
-    margin-bottom: var(--spacing-xl);
-  }
+  margin-bottom: var(--spacing-xl);
+  font-weight: var(--font-weight-bold);
 `;
 
-const SectionSubtitle = styled.p`
-  font-size: var(--font-size-lg);
-  text-align: left;
+const ContentDescription = styled.p`
+  text-align: center;
   max-width: 800px;
   margin: 0 auto var(--spacing-xxl);
+  font-size: var(--font-size-lg);
   color: var(--text-secondary);
-  
-  @media (max-width: 768px) {
-    font-size: var(--font-size-md);
-    line-height: 1.8;
-    padding: 0 var(--spacing-md);
-  }
 `;
 
-const ContentCards = styled(motion.div)`
+const ArticlesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-xl);
   max-width: var(--max-width);
-  margin: 0 auto;
+  margin: 0 auto var(--spacing-xl);
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
+    padding: 0 var(--spacing-md);
   }
 `;
 
-const ContentCard = styled(motion.div)`
+const ArticleCard = styled.article`
   background: var(--white);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-normal);
-  display: flex;
-  flex-direction: column;
-  height: 100%;
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-md);
   }
 `;
 
-const ContentImage = styled.div`
+const ArticleImage = styled.div`
   height: 200px;
-  background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-light) 100%);
+  background: var(--light-bg);
   position: relative;
   overflow: hidden;
   
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
+  img {
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  }
-  
-  ${ContentCard}:hover &::after {
-    animation: shimmer 1.5s infinite;
-    
-    @keyframes shimmer {
-      0% {
-        opacity: 0.5;
-      }
-      50% {
-        opacity: 0.8;
-      }
-      100% {
-        opacity: 0.5;
-      }
-    }
-  }
-`;
-
-const ContentInfo = styled.div`
-  padding: var(--spacing-xl);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const ContentTitle = styled.h3`
-  font-size: var(--font-size-lg);
-  margin-bottom: var(--spacing-md);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-`;
-
-const ContentDescription = styled.p`
-  font-size: var(--font-size-md);
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-lg);
-  line-height: 1.6;
-  flex: 1;
-`;
-
-const ContentLink = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  color: var(--primary-color);
-  font-weight: var(--font-weight-medium);
-  text-decoration: none;
-  position: relative;
-  padding-bottom: 2px;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: var(--primary-color);
-    transform: scaleX(0);
-    transform-origin: right;
+    object-fit: cover;
     transition: transform var(--transition-normal);
   }
   
+  ${ArticleCard}:hover & img {
+    transform: scale(1.05);
+  }
+`;
+
+const ArticleContent = styled.div`
+  padding: var(--spacing-lg);
+`;
+
+const ArticleTitle = styled.h3`
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.4;
+`;
+
+const ArticleExcerpt = styled.p`
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+`;
+
+const ViewMoreButton = styled(Link)`
+  display: block;
+  width: fit-content;
+  margin: 0 auto;
+  padding: var(--spacing-md) var(--spacing-xl);
+  background: var(--primary-color);
+  color: var(--white);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: var(--font-weight-bold);
+  transition: all var(--transition-fast);
+  
   &:hover {
-    text-decoration: none;
-    
-    &::after {
-      transform: scaleX(1);
-      transform-origin: left;
-    }
-  }
-  
-  span {
-    margin-left: var(--spacing-xs);
-    transition: transform var(--transition-fast);
-  }
-  
-  &:hover span {
-    transform: translateX(3px);
+    background: var(--primary-dark);
+    transform: translateY(-2px);
   }
 `;
 
@@ -920,6 +842,34 @@ const Home = () => {
     }
   };
 
+  // 表示する記事データを定義
+  const featuredArticles = [
+    {
+      id: 1,
+      title: '完全初心者向け：生成AI基礎知識ガイド',
+      content: '生成AIの基本から主要なツール紹介、プロンプトのコツ、活用例までを初心者にも丁寧に解説したガイドです。専門用語はかみ砕いて説明されており、実践に活せるテクニックや事例も豊富です。AIを初めて学ぶ人でも安心して読み進められ、「生成AIってこういうことか！」と理解できる内容になっています。',
+      date: '2025年3月9日',
+      category: '生成AI基礎',
+      image: 'https://assets.st-note.com/production/uploads/images/169336079/rectangle_large_type_2_74f59179d21f86df1238e455ca9b5ec9.png'
+    },
+    {
+      id: 2,
+      title: '生成AIとは？初心者でも理解できるAI活用方法【2025年最新版】',
+      content: '話題の「生成AI」とは何かを解説し、従来のAIとの違いやAIを実用的な活用方法を初心者向けに紹介していきます。ChatGPT登場以降の社会のインパクトや2025年最新動向にも触れ、生成AIが私たちの生活や仕事にどう関わるかを分かりやすく説明。専門知識ゼロでも「生成AIって結局こういうことね！」と理解でき、実践できる内容です。',
+      date: '2025年1月9日',
+      category: '生成AI活用',
+      image: 'https://assets.st-note.com/production/uploads/images/177065072/rectangle_large_type_2_bc1ee58b4f43ec7d312728752d97653d.png'
+    },
+    {
+      id: 3,
+      title: '生成AIの使い方【初心者向け】',
+      content: '生成AIの基本的な使い方を初心者向けに解説。ChatGPTやBingなどの具体的な活用方法を、実践的な例を交えながら紹介しています。',
+      date: '2025年1月10日',
+      category: '生成AI活用',
+      image: 'https://assets.st-note.com/production/uploads/images/177065072/rectangle_large_type_2_bc1ee58b4f43ec7d312728752d97653d.png'
+    }
+  ];
+
   return (
     <HomeContainer>
       <HeroSection>
@@ -1040,48 +990,32 @@ const Home = () => {
       </SolutionSection>
 
       <ContentsSection>
-        <ContentsSectionTitle ref={contentsTitleRef} inView={contentsTitleInView}>CONTENTS</ContentsSectionTitle>
-        <SectionSubtitle>
-          AIの理解を深めるための<br />
+        <ContentTitle>CONTENTS</ContentTitle>
+        <ContentDescription>
+          AIの理解を深めるための
+          <br />
           厳選されたコンテンツをご紹介します
-        </SectionSubtitle>
-        <ContentCards 
-          ref={contentCardsRef}
-          variants={cardsContainerVariants}
-          initial="hidden"
-          animate={contentCardsInView ? "visible" : "hidden"}
-        >
-          <ContentCard variants={cardVariants}>
-            <ContentImage />
-            <ContentInfo>
-              <ContentTitle>AIの基礎知識</ContentTitle>
-              <ContentDescription>
-                AIとは何か、どのように機能するのか、基本的な概念を分かりやすく解説します。
-              </ContentDescription>
-              <ContentLink to="/contents/ai-basics">詳しく見る<span>→</span></ContentLink>
-            </ContentInfo>
-          </ContentCard>
-          <ContentCard variants={cardVariants}>
-            <ContentImage />
-            <ContentInfo>
-              <ContentTitle>ビジネスでのAI活用法</ContentTitle>
-              <ContentDescription>
-                業務効率化からマーケティングまで、ビジネスシーンでのAI活用方法を紹介します。
-              </ContentDescription>
-              <ContentLink to="/contents/business-ai">詳しく見る<span>→</span></ContentLink>
-            </ContentInfo>
-          </ContentCard>
-          <ContentCard variants={cardVariants}>
-            <ContentImage />
-            <ContentInfo>
-              <ContentTitle>AIとの上手な対話方法</ContentTitle>
-              <ContentDescription>
-                AIから最適な回答を得るためのプロンプトの書き方や対話のコツを解説します。
-              </ContentDescription>
-              <ContentLink to="/contents/prompt-engineering">詳しく見る<span>→</span></ContentLink>
-            </ContentInfo>
-          </ContentCard>
-        </ContentCards>
+        </ContentDescription>
+        
+        <ArticlesGrid>
+          {featuredArticles.map(article => (
+            <ArticleCard key={article.id}>
+              <ArticleImage>
+                <img src={article.image} alt={article.title} />
+              </ArticleImage>
+              <ArticleContent>
+                <ArticleTitle>{article.title}</ArticleTitle>
+                <ArticleExcerpt>
+                  {article.content.slice(0, 100)}...
+                </ArticleExcerpt>
+              </ArticleContent>
+            </ArticleCard>
+          ))}
+        </ArticlesGrid>
+        
+        <ViewMoreButton to="/articles">
+          もっと見る
+        </ViewMoreButton>
       </ContentsSection>
 
       <CTASection>

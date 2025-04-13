@@ -1,0 +1,11 @@
+export const article28 = {
+  id: 28,
+  title: 'AI時代の「創る」ということ。',
+  content: `<p>AIが創作や制作を支援できる時代に、人間が「創る」ことの意味や価値はどう変わるのかを考察した記事です。AIによる創作支援の特徴や限界を踏まえつつ、人間ならではの創造性や感情表現、文脈理解の重要性を解説。さらに、AIと人間が協働して作品を創り出す新しい可能性や、AI時代における「創る」スキルの再定義についても言及しています。単なる技術解説ではなく、AI時代の人間性や創造性について深く考えさせられる内容です。</p>`,
+  date: '2025年4月20日',
+  category: 'スキル',
+  image: 'https://assets.st-note.com/production/uploads/images/169336079/rectangle_large_type_2_74f59179d21f86df1238e455ca9b5ec9.png?width=1200',
+  slug: 'creating-in-ai-era',
+  noteUrl: 'https://note.com/maruking777/n/nbe0d03de1ffe',
+  relatedArticles: [1, 3, 7, 9, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]
+}; 

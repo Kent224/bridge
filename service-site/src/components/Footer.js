@@ -30,13 +30,17 @@ const FooterContent = styled.div`
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: var(--spacing-xl);
+    gap: calc(var(--spacing-xl) * 0.5);
   }
 `;
 
 const FooterSection = styled.div`
   display: flex;
   flex-direction: column;
+  
+  @media (max-width: 768px) {
+    gap: calc(var(--spacing-lg) * 0.5);
+  }
 `;
 
 const LogoSection = styled(FooterSection)`
@@ -67,6 +71,10 @@ const LinkTitle = styled.h4`
   font-size: var(--font-size-md);
   margin-bottom: var(--spacing-lg);
   color: var(--white);
+  
+  @media (max-width: 768px) {
+    margin-bottom: calc(var(--spacing-lg) * 0.5);
+  }
 `;
 
 const LinkList = styled.ul`
@@ -79,7 +87,7 @@ const LinkItem = styled.li`
   margin-bottom: var(--spacing-md);
   
   @media (max-width: 768px) {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: calc(var(--spacing-lg) * 0.5);
   }
 `;
 

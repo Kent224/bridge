@@ -54,14 +54,11 @@ const Container = styled.div`
 
 const FilterBar = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
   
   @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
     gap: var(--spacing-md);
   }
 `;
@@ -70,10 +67,10 @@ const Categories = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
   
   @media (max-width: 768px) {
     width: 100%;
-    margin-bottom: var(--spacing-md);
     overflow-x: auto;
     padding-bottom: var(--spacing-xs);
     -webkit-overflow-scrolling: touch;
@@ -109,10 +106,12 @@ const CategoryButton = styled.button`
 
 const SearchBar = styled.div`
   position: relative;
-  width: 300px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
   
   @media (max-width: 768px) {
-    width: 100%;
+    max-width: 100%;
   }
 `;
 
@@ -346,6 +345,8 @@ const Articles = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [articles, setArticles] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const articlesPerPage = 15; // 1ページあたりの記事数（3列×5行）
   
   // 記事データの読み込み
   useEffect(() => {
@@ -369,6 +370,27 @@ const Articles = () => {
     return matchesCategory && matchesSearch;
   });
   
+  // ページネーション用の記事配列を作成
+  const indexOfLastArticle = currentPage * articlesPerPage;
+  const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
+  const currentArticles = filteredArticles.slice(indexOfFirstArticle, indexOfLastArticle);
+  const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
+
+  // ページ変更ハンドラー
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo(0, 0); // ページトップにスクロール
+  };
+
+  // ページ番号の配列を生成
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+    return pageNumbers;
+  };
+
   // 記事の内容から抜粋を生成する関数
   const generateExcerpt = (content, maxLength = 150) => {
     if (!content) return '';
@@ -406,7 +428,10 @@ const Articles = () => {
                 <CategoryButton
                   key={category}
                   active={activeCategory === category}
-                  onClick={() => setActiveCategory(category)}
+                  onClick={() => {
+                    setActiveCategory(category);
+                    setCurrentPage(1); // カテゴリー変更時にページを1に戻す
+                  }}
                 >
                   {category}
                 </CategoryButton>
@@ -418,14 +443,17 @@ const Articles = () => {
                 type="text" 
                 placeholder="記事を検索..." 
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // 検索時にページを1に戻す
+                }}
               />
               <SearchIcon>🔍</SearchIcon>
             </SearchBar>
           </FilterBar>
           
           <ArticlesGrid>
-            {filteredArticles.map(article => (
+            {currentArticles.map(article => (
               <ArticleCardLink
                 key={article.id}
                 to={`/articles/${article.slug}`}
@@ -457,13 +485,31 @@ const Articles = () => {
             ))}
           </ArticlesGrid>
           
-          <Pagination>
-            <PageButton disabled>«</PageButton>
-            <PageButton active>1</PageButton>
-            <PageButton>2</PageButton>
-            <PageButton>3</PageButton>
-            <PageButton>»</PageButton>
-          </Pagination>
+          {totalPages > 1 && (
+            <Pagination>
+              <PageButton 
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                «
+              </PageButton>
+              {getPageNumbers().map(number => (
+                <PageButton
+                  key={number}
+                  active={currentPage === number}
+                  onClick={() => handlePageChange(number)}
+                >
+                  {number}
+                </PageButton>
+              ))}
+              <PageButton 
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                »
+              </PageButton>
+            </Pagination>
+          )}
         </Container>
       </ContentSection>
     </PageContainer>
