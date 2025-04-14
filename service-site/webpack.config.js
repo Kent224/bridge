@@ -7,7 +7,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.[contenthash].js',
-    publicPath: '/'
+    publicPath: './'
   },
   module: {
     rules: [
@@ -53,7 +53,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './public/index.html'
+      template: './public/index.html',
+      filename: 'index.html'
     }),
     new CopyWebpackPlugin({
       patterns: [
@@ -64,6 +65,10 @@ module.exports = {
         {
           from: 'public/manifest.json',
           to: 'manifest.json'
+        },
+        {
+          from: 'public/.htaccess',
+          to: '.htaccess'
         }
       ]
     })
