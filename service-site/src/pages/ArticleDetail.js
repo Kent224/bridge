@@ -464,12 +464,6 @@ const ArticleDetail = () => {
     // URLのスラッグに一致する記事を検索
     const foundArticle = allArticles.find(a => a.slug === slug);
     
-    // noteURLがある場合は、そのURLにリダイレクト
-    if (foundArticle && foundArticle.noteUrl) {
-      window.location.href = foundArticle.noteUrl;
-      return;
-    }
-    
     if (foundArticle) {
       setArticle(foundArticle);
       
