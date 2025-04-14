@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path');
 const { loadAllArticles, saveArticleToFile, deleteArticleFile, syncArticlesToFiles } = require('../utils/fileUtils');
 
 const app = express();
@@ -9,6 +10,9 @@ const PORT = process.env.PORT || 3001;
 // ミドルウェア
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
+
+// 静的ファイルの提供
+app.use(express.static(path.join(__dirname, '../../dist')));
 
 // すべての記事を取得するAPI
 app.get('/api/articles', async (req, res) => {
@@ -75,6 +79,11 @@ app.post('/api/articles/sync', async (req, res) => {
     console.error('Error syncing articles:', error);
     res.status(500).json({ error: 'Failed to sync articles' });
   }
+});
+
+// SPAのルーティングに対応するフォールバックルート
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../dist/index.html'));
 });
 
 // サーバー起動
