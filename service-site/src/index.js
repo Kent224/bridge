@@ -19,7 +19,7 @@ import ArticleManager from './pages/admin/ArticleManager';
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <>
       <GlobalStyle />
       <Routes>
         {/* 通常のサイトルート */}
@@ -47,13 +47,15 @@ const App = () => {
           <Route path="settings" element={<div>設定（実装予定）</div>} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </>
   );
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>
 ); 
