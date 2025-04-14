@@ -457,8 +457,6 @@ const Articles = () => {
               <ArticleCardLink
                 key={article.id}
                 to={`/articles/${article.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
               >
                 <ArticleCard>
                   <ArticleImage>

@@ -16,6 +16,7 @@ const ArticleHeader = styled.header`
   
   @media (max-width: 768px) {
     padding: var(--spacing-xl) var(--spacing-md);
+    padding-top: calc(var(--spacing-xl) * 1.5);
   }
 `;
 
@@ -36,6 +37,11 @@ const ArticleMeta = styled.div`
   margin-bottom: var(--spacing-md);
   font-size: var(--font-size-sm);
   color: rgba(255, 255, 255, 0.8);
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
 `;
 
 const ArticleDate = styled.span`
@@ -60,15 +66,16 @@ const ArticleTitle = styled.h1`
   @media (max-width: 768px) {
     font-size: clamp(1.5rem, 5vw, 2rem);
     line-height: 1.4;
+    margin-bottom: var(--spacing-md);
   }
 `;
 
 const MainContent = styled.div`
   background: var(--white);
-  padding: calc(var(--spacing-xl) * 3) 0;
+  padding: calc(var(--spacing-xl) * 2) 0;
   
   @media (max-width: 768px) {
-    padding: var(--spacing-xl) 0;
+    padding: var(--spacing-lg) 0;
   }
 `;
 
@@ -89,7 +96,7 @@ const ArticleContent = styled.article`
     
     @media (max-width: 768px) {
       font-size: calc(var(--font-size-lg) * 1.1);
-      margin: var(--spacing-xl) 0 var(--spacing-md);
+      margin: var(--spacing-lg) 0 var(--spacing-md);
     }
   }
   
@@ -101,6 +108,7 @@ const ArticleContent = styled.article`
     
     @media (max-width: 768px) {
       font-size: var(--font-size-md);
+      margin: var(--spacing-lg) 0 var(--spacing-sm);
     }
   }
   
@@ -110,10 +118,15 @@ const ArticleContent = styled.article`
     
     @media (max-width: 768px) {
       padding-left: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
     }
     
     li {
       margin-bottom: var(--spacing-sm);
+      
+      @media (max-width: 768px) {
+        margin-bottom: var(--spacing-xs);
+      }
     }
   }
   
@@ -126,6 +139,8 @@ const ArticleContent = styled.article`
     
     @media (max-width: 768px) {
       padding: var(--spacing-sm) var(--spacing-md);
+      margin: var(--spacing-md) 0;
+      font-size: var(--font-size-sm);
     }
     
     p:last-child {
@@ -138,6 +153,11 @@ const ArticleContent = styled.article`
     height: auto;
     border-radius: var(--radius-md);
     margin: var(--spacing-lg) 0;
+    
+    @media (max-width: 768px) {
+      margin: var(--spacing-md) 0;
+      border-radius: var(--radius-sm);
+    }
   }
   
   code {
@@ -184,7 +204,8 @@ const ArticleImage = styled.div`
   }
   
   @media (max-width: 768px) {
-    height: 250px;
+    height: 200px;
+    margin: calc(var(--spacing-lg) * -1) 0 var(--spacing-md);
   }
 `;
 
@@ -244,6 +265,7 @@ const RelatedSection = styled.div`
   
   @media (max-width: 768px) {
     margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
   }
 `;
 
@@ -252,6 +274,11 @@ const RelatedTitle = styled.h3`
   margin-bottom: var(--spacing-xl);
   font-weight: var(--font-weight-bold);
   text-align: center;
+  
+  @media (max-width: 768px) {
+    font-size: var(--font-size-md);
+    margin-bottom: var(--spacing-lg);
+  }
 `;
 
 const RelatedGrid = styled.div`
@@ -261,6 +288,7 @@ const RelatedGrid = styled.div`
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
   }
 `;
 
@@ -275,6 +303,12 @@ const RelatedCard = styled.article`
     transform: translateY(-5px);
     box-shadow: var(--shadow-md);
   }
+  
+  @media (max-width: 768px) {
+    &:hover {
+      transform: translateY(-3px);
+    }
+  }
 `;
 
 const RelatedImage = styled.div`
@@ -286,10 +320,18 @@ const RelatedImage = styled.div`
     height: 100%;
     object-fit: cover;
   }
+  
+  @media (max-width: 768px) {
+    height: 120px;
+  }
 `;
 
 const RelatedContent = styled.div`
   padding: var(--spacing-md);
+  
+  @media (max-width: 768px) {
+    padding: var(--spacing-sm);
+  }
 `;
 
 const RelatedArticleTitle = styled.h4`
@@ -305,6 +347,10 @@ const RelatedArticleTitle = styled.h4`
     &:hover {
       color: var(--primary-color);
     }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: var(--font-size-sm);
   }
 `;
 
@@ -351,21 +397,23 @@ const CTAButton = styled.a`
 `;
 
 const BackToArticles = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  color: var(--primary-color);
+  display: inline-block;
+  color: var(--text-secondary);
   text-decoration: none;
-  font-weight: var(--font-weight-medium);
-  margin-bottom: var(--spacing-xl);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-lg);
+  
+  &:hover {
+    color: var(--primary-color);
+  }
+  
+  @media (max-width: 768px) {
+    margin-bottom: var(--spacing-md);
+  }
   
   &::before {
     content: '←';
     margin-right: var(--spacing-xs);
-    transition: transform var(--transition-fast);
-  }
-  
-  &:hover::before {
-    transform: translateX(-3px);
   }
 `;
 
@@ -576,16 +624,6 @@ const ArticleDetail = () => {
               note記事を読む
             </NoteButton>
           )}
-          
-          <ShareSection>
-            <ShareTitle>この記事をシェアする</ShareTitle>
-            <ShareButtons>
-              <ShareButton href="#" title="Twitterでシェア">𝕏</ShareButton>
-              <ShareButton href="#" title="Facebookでシェア">f</ShareButton>
-              <ShareButton href="#" title="LINEでシェア">L</ShareButton>
-              <ShareButton href="#" title="メールで送る">✉</ShareButton>
-            </ShareButtons>
-          </ShareSection>
           
           {relatedArticles.length > 0 && (
             <RelatedSection>
