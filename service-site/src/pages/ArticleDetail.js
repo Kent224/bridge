@@ -423,6 +423,28 @@ const SourceIcon = styled.span`
   top: -1px;
 `;
 
+const NoteButton = styled.a`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #41C9B4;
+  color: var(--white);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: background-color 0.2s;
+  margin-top: var(--spacing-lg);
+
+  &:hover {
+    background: #3BB5A2;
+  }
+
+  svg {
+    margin-right: var(--spacing-sm);
+  }
+`;
+
 // 記事詳細ページコンポーネント
 const ArticleDetail = () => {
   const { slug } = useParams();
@@ -509,9 +531,11 @@ const ArticleDetail = () => {
         <Container>
           <BackToArticles to="/articles">記事一覧に戻る</BackToArticles>
           
-          <ArticleImage>
-            <img src={article.image} alt={article.title} />
-          </ArticleImage>
+          {article.image && (
+            <ArticleImage>
+              <img src={article.image} alt={article.title} />
+            </ArticleImage>
+          )}
           
           {article.source && (
             <SourceCitation>
@@ -548,6 +572,15 @@ const ArticleDetail = () => {
                 元記事を読む →
               </SourceLink>
             </SourceCitation>
+          )}
+          
+          {article.noteUrl && (
+            <NoteButton href={article.noteUrl} target="_blank" rel="noopener noreferrer">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 19H5V5H12V3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V12H19V19ZM14 3V5H17.59L7.76 14.83L9.17 16.24L19 6.41V10H21V3H14Z" fill="currentColor"/>
+              </svg>
+              note記事を読む
+            </NoteButton>
           )}
           
           <ShareSection>
