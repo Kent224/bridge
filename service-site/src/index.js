@@ -17,12 +17,13 @@ import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import ArticleManager from './pages/admin/ArticleManager';
 
-const App = () => {
-  return (
-    <>
-      <GlobalStyle />
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <GlobalStyle />
+    <BrowserRouter>
+      {/* 通常のサイトルート */}
       <Routes>
-        {/* 通常のサイトルート */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="about" element={<About />} />
@@ -47,15 +48,6 @@ const App = () => {
           <Route path="settings" element={<div>設定（実装予定）</div>} />
         </Route>
       </Routes>
-    </>
-  );
-};
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
     </BrowserRouter>
   </React.StrictMode>
 ); 
