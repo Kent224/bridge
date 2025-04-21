@@ -182,7 +182,7 @@ const Footer = () => {
               <LogoImage src={Logo} alt="Bridge Logo" />
             </LogoWrapper>
             <FooterDescription>
-              Bridge（ブリッジ）は、非エンジニアの方でもAI情報を効率よく取得・活用していけることを目的としたLINE媒体のAIメディアサービスです。
+              Bridge（ブリッジ）は、非エンジニアの方がAI知識を効率よく取得・活用していくことを目的としたLINE媒体のAIメディアサービスです。
             </FooterDescription>
           </LogoSection>
           

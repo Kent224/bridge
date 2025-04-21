@@ -3,26 +3,34 @@ import styled from 'styled-components';
 import { Link, NavLink } from 'react-router-dom';
 import Logo from '../assets/logo/master-logo.svg';
 
-const HeaderWrapper = styled.header`
+const HeaderContainer = styled.header`
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
   width: 100%;
   height: var(--header-height);
-  background-color: var(--white);
-  box-shadow: ${props => props.isScrolled ? 'var(--shadow-md)' : 'none'};
-  z-index: 1000;
-  transition: box-shadow var(--transition-normal);
-`;
-
-const HeaderContainer = styled.div`
+  padding: 0 var(--spacing-lg);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 100%;
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 var(--spacing-lg);
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 1px 20px rgba(31, 10, 59, 0.05);
+  transition: all 0.3s ease;
+
+  &.scrolled {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 1px 20px rgba(31, 10, 59, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    padding: 0 var(--spacing-md);
+  }
 `;
 
 const LogoWrapper = styled(Link)`
@@ -273,44 +281,42 @@ const Header = () => {
   };
 
   return (
-    <HeaderWrapper isScrolled={isScrolled}>
-      <HeaderContainer>
-        <LogoWrapper to="/" onClick={closeMenu}>
-          <LogoImage src={Logo} alt="Bridge Logo" />
-        </LogoWrapper>
+    <HeaderContainer className={isScrolled ? 'scrolled' : ''}>
+      <LogoWrapper to="/" onClick={closeMenu}>
+        <LogoImage src={Logo} alt="Bridge Logo" />
+      </LogoWrapper>
+      
+      <MenuButton onClick={toggleMenu}>
+        <MenuIcon isOpen={isMenuOpen} />
+      </MenuButton>
+      
+      <Nav isOpen={isMenuOpen}>
+        <NavList>
+          {/* 「私たちについて」ページは準備中につき非表示
+          <NavItem>
+            <NavLinkStyled to="/about" onClick={closeMenu}>
+              私たちについて
+            </NavLinkStyled>
+          </NavItem>
+          */}
+          <NavItem>
+            <NavLinkStyled to="/articles" onClick={closeMenu}>
+              AIに関する記事
+            </NavLinkStyled>
+          </NavItem>
+        </NavList>
         
-        <MenuButton onClick={toggleMenu}>
-          <MenuIcon isOpen={isMenuOpen} />
-        </MenuButton>
-        
-        <Nav isOpen={isMenuOpen}>
-          <NavList>
-            {/* 「私たちについて」ページは準備中につき非表示
-            <NavItem>
-              <NavLinkStyled to="/about" onClick={closeMenu}>
-                私たちについて
-              </NavLinkStyled>
-            </NavItem>
-            */}
-            <NavItem>
-              <NavLinkStyled to="/articles" onClick={closeMenu}>
-                AIに関する記事
-              </NavLinkStyled>
-            </NavItem>
-          </NavList>
-          
-          <LineButtonWrapper>
-            <Button 
-              href="https://lin.ee/aTshCxr"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              LINE で友だち追加
-            </Button>
-          </LineButtonWrapper>
-        </Nav>
-      </HeaderContainer>
-    </HeaderWrapper>
+        <LineButtonWrapper>
+          <Button 
+            href="https://lin.ee/aTshCxr"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            LINE で友だち追加
+          </Button>
+        </LineButtonWrapper>
+      </Nav>
+    </HeaderContainer>
   );
 };
 

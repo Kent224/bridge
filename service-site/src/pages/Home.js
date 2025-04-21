@@ -267,6 +267,22 @@ const ShimmerText = styled.span`
   }
 `;
 
+const HeroTitle = styled(motion.h1)`
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  font-weight: var(--font-weight-bold);
+  text-align: left;
+  margin-bottom: var(--spacing-xl);
+  color: var(--white);
+  line-height: 1.5;
+  
+  @media (max-width: 768px) {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    line-height: 1.8;
+    text-align: left;
+    margin-bottom: var(--spacing-xl);
+  }
+`;
+
 const HeroSubtitle = styled(motion.p)`
   font-size: clamp(1.2rem, 2.5vw, 1.5rem);
   font-weight: var(--font-weight-medium);
@@ -870,6 +886,10 @@ const Home = () => {
     }
   ];
 
+  const handleViewMore = () => {
+    window.scrollTo(0, 0);
+  };
+
   return (
     <HomeContainer>
       <HeroSection>
@@ -909,9 +929,8 @@ const Home = () => {
                   delay: 0.5
                 }}
               >
-                非エンジニアでも、<br />
-                AIの力を理解し、活用できる。<br />
-                今日から始められるAI情報取得。
+                非エンジニアも気づいている人は始めている。<br />
+                LINEで簡単にAI知識を習得していくなら、Bridge
               </HeroSubtitle>
               
               <ButtonGroup 
@@ -943,7 +962,7 @@ const Home = () => {
           <QuestionTitle ref={questionTitleRef} inView={questionTitleInView}>PROBLEM</QuestionTitle>
           <QuestionText>
             AIの情報は日々目まぐるしく<br />
-            更新されています。<br />
+            更新されていっていますよね。<br />
             <QuestionHighlight>「経済の流れについていけていない...」</QuestionHighlight><br />
             と言う方、必見。
           </QuestionText>
@@ -953,8 +972,8 @@ const Home = () => {
         <SolutionContainer>
           <SolutionTitle ref={solutionTitleRef} inView={solutionTitleInView}>SOLUTION</SolutionTitle>
           <SolutionText>
-            Bridgeは、日常に溶け込むLINEを活用した<br />
-            新しいAI学習体験を提供します。
+            Bridgeは、日常的にLINEを通じて<br />
+            簡単で効率的なAI知識の学習体験を提供します。
           </SolutionText>
           
           <SolutionCards 
@@ -1013,7 +1032,7 @@ const Home = () => {
           ))}
         </ArticlesGrid>
         
-        <ViewMoreButton to="/articles">
+        <ViewMoreButton to="/articles" onClick={handleViewMore}>
           もっと見る
         </ViewMoreButton>
       </ContentsSection>

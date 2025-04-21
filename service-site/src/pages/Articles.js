@@ -269,23 +269,17 @@ const ArticleExcerpt = styled.p`
   flex: 1;
 `;
 
-const ArticleReadMore = styled(Link)`
+const ReadMoreLink = styled(Link)`
+  display: inline-block;
+  margin-top: var(--spacing-md);
   color: var(--primary-color);
   text-decoration: none;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  display: inline-flex;
-  align-items: center;
-  
-  span {
-    margin-left: var(--spacing-xs);
-    transition: transform var(--transition-fast);
-  }
+  font-weight: var(--font-weight-bold);
+  transition: all var(--transition-fast);
   
   &:hover {
-    span {
-      transform: translateX(4px);
-    }
+    color: var(--primary-dark);
+    transform: translateX(5px);
   }
 `;
 
@@ -411,6 +405,10 @@ const Articles = () => {
     return excerpt + '...';
   };
 
+  const handleReadMore = () => {
+    window.scrollTo(0, 0);
+  };
+
   return (
     <PageContainer>
       <HeroSection>
@@ -457,6 +455,7 @@ const Articles = () => {
               <ArticleCardLink
                 key={article.id}
                 to={`/articles/${article.slug}`}
+                onClick={handleReadMore}
               >
                 <ArticleCard>
                   <ArticleImage>
@@ -476,7 +475,12 @@ const Articles = () => {
                       {article.title}
                     </ArticleTitle>
                     <ArticleExcerpt>{generateExcerpt(article.content)}</ArticleExcerpt>
-                    <span>続きを読む →</span>
+                    <ReadMoreLink 
+                      to={`/articles/${article.slug}`} 
+                      onClick={handleReadMore}
+                    >
+                      続きを読む →
+                    </ReadMoreLink>
                   </ArticleContent>
                 </ArticleCard>
               </ArticleCardLink>
