@@ -1,0 +1,15 @@
+{
+  "id": 2,
+  "title": "ChatGPTを活用した業務効率化のベストプラクティス",
+  "content": "<p>ChatGPTを使って業務をどのように効率化できるのか、具体的な事例とともに解説します。プロンプトの書き方のコツから、業務別の活用シーン、注意点まで詳しく説明しています。特に、コーディング、文書作成、データ分析の場面での活用方法に焦点を当てています。</p>",
+  "date": "2025年3月10日",
+  "category": "業務効率化",
+  "image": "https://assets.st-note.com/production/uploads/images/177065073/rectangle_large_type_2_1234567890abcdef.png?width=1200",
+  "slug": "chatgpt-business-efficiency",
+  "noteUrl": "https://note.com/brightiers/n/abcdef123456",
+  "relatedArticles": [
+    1,
+    3,
+    5
+  ]
+}
