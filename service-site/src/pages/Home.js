@@ -194,7 +194,7 @@ const HeroLeft = styled.div`
 const HeroRight = styled.div`
   flex: 1;
   position: relative;
-  background-image: url('https://images.unsplash.com/photo-1601972599720-36938d4ecd31?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+  background-image: url('../assets/bridge-fv.png');
   background-size: cover;
   background-position: center;
   
