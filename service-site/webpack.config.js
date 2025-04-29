@@ -73,6 +73,10 @@ module.exports = {
         {
           from: 'public/.htaccess',
           to: '.htaccess'
+        },
+        {
+          from: 'src/assets',
+          to: 'images'
         }
       ]
     })

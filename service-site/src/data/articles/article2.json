@@ -1,12 +1,12 @@
 {
   "id": 2,
-  "title": "ChatGPTを活用した業務効率化のベストプラクティス",
-  "content": "<p>ChatGPTを使って業務をどのように効率化できるのか、具体的な事例とともに解説します。プロンプトの書き方のコツから、業務別の活用シーン、注意点まで詳しく説明しています。特に、コーディング、文書作成、データ分析の場面での活用方法に焦点を当てています。</p>",
-  "date": "2025年3月10日",
-  "category": "業務効率化",
-  "image": "https://assets.st-note.com/production/uploads/images/177065073/rectangle_large_type_2_1234567890abcdef.png?width=1200",
+  "title": "本を全て読むか、生成AIが作った要約で読むか？",
+  "content": "<p>毎朝1時間、生成AI「Claude」と対話する習慣が生まれた筆者。AIによる要約の精度に驚きつつ、「本を全文読む意味」について考え始める。要約で知る15分と、全文を読んで自分の解釈を得る8時間──その違いとは？読書の本質を揺さぶる体験と、AI時代の新しい読書スタイルへの期待が綴られる。</p>",
+  "date": "2025年4月28日",
+  "category": "日常生活",
+  "image": "https://assets.st-note.com/production/uploads/images/185897358/rectangle_large_type_2_43739cfe080ea9fa6e48c48116641c23.png?width=1200",
   "slug": "chatgpt-business-efficiency",
-  "noteUrl": "https://note.com/brightiers/n/abcdef123456",
+  "noteUrl": "https://note.com/f30103/n/n4df8ff993a4a",
   "relatedArticles": [
     1,
     3,
