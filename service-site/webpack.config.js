@@ -72,7 +72,6 @@ module.exports = {
         },
         {
           from: 'public/.htaccess',
-          to: '.htaccess',
           noErrorOnMissing: true
         },
         {
